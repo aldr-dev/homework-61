@@ -4,14 +4,21 @@ import axios from 'axios';
 import './Countries.css';
 import Preloader from '../../components/Preloader/Preloader';
 import CountriesList from '../../components/CountriesList/CountriesList';
+import CountryDetails from '../../components/CountryDetails/CountryDetails';
 
 const BASE_URL = 'https://restcountries.com/v2/all?fields=alpha3Code,name';
 const DETAILS_COUNTRIES_URL = (alphaCode: string) => `https://restcountries.com/v2/alpha/${alphaCode}`;
 
 const Countries = () => {
   const [countries, setCountries] = useState<ApiCountries[]>([]);
-  const [detailsCountries, setDetailsCountries] = useState<ApiDetailsCountries[]>([]);
-  const [error, setError] = useState('');
+  const [detailsCountries, setDetailsCountries] = useState<ApiDetailsCountries>({
+    name: '',
+    capital: '',
+    population: '',
+    flag: '',
+    borders: [],
+  });
+  const [error, setError] = useState(false);
   const [preloader, setPreloader] = useState(false);
 
   useEffect(() => {
@@ -44,21 +51,24 @@ const Countries = () => {
  const dataDetailsFetch = async (alphaCode: string) => {
    try {
      setPreloader(true);
-     const response = await axios.get<ApiDetailsCountries[]>(DETAILS_COUNTRIES_URL(alphaCode));
+     const response = await axios.get<ApiDetailsCountries>(DETAILS_COUNTRIES_URL(alphaCode));
      setPreloader(false);
      if (response.status !== 200) {
        throw new Error(`Запрос завершился с ошибкой статуса: ${response.status}`);
      }
 
-     if (response.data.length > 0) {
-       const countryDetailsData = response.data.map((countryDetails) => ({
-         name: countryDetails.name,
-         capital: countryDetails.capital,
-         population: countryDetails.population,
-         flag: countryDetails.flag,
-         borders: countryDetails.borders,
-       }));
-       setDetailsCountries(countryDetailsData);
+     if (response.data !== undefined) {
+       setDetailsCountries((prevState) => {
+         return {
+           ...prevState,
+           name: response.data.name,
+           capital: response.data.capital,
+           population: response.data.population,
+           flag: response.data.flag,
+           borders: response.data.borders,
+         };
+       });
+
      }
    } catch (error) {
      setPreloader(false);
@@ -70,7 +80,10 @@ const Countries = () => {
   return (
     <>
       <Preloader preloader={preloader}/>
-      <CountriesList countriesList={countries} onClickCountry={dataDetailsFetch}/>
+      <div className="columns">
+        <CountriesList countriesList={countries} onClickCountry={dataDetailsFetch}/>
+        <CountryDetails url={DETAILS_COUNTRIES_URL} country={detailsCountries}/>
+      </div>
     </>
   );
 };

@@ -1,9 +1,10 @@
 .countries {
-  width: 320px;
+  width: 280px;
   border: 1px solid lightgrey;
   height: calc(100vh - 20px);
   overflow-y: auto;
   border-radius: 5px;
+  flex-shrink: 0;
 }
 
 .countries-list {
