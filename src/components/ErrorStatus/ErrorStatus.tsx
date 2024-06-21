@@ -1,4 +1,4 @@
-import './Error.css';
+import './ErrorStatus.css';
 import React from 'react';
 
 interface Props extends React.PropsWithChildren {
@@ -6,7 +6,7 @@ interface Props extends React.PropsWithChildren {
   handleError: (status: boolean) => void;
 }
 
-const Error: React.FC<Props> = ({error, handleError, children}) => {
+const ErrorStatus: React.FC<Props> = ({error, handleError, children}) => {
   return (
     <>
       {error ? (
@@ -19,4 +19,4 @@ const Error: React.FC<Props> = ({error, handleError, children}) => {
   );
 };
 
-export default Error;
+export default ErrorStatus;

@@ -2,7 +2,7 @@ import {ApiDetailsCountries} from '../../types';
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import './CountryDetails.css';
-import Error from '../Error/Error';
+import ErrorStatus from '../ErrorStatus/ErrorStatus';
 
 interface Props {
   country: ApiDetailsCountries;
@@ -11,7 +11,7 @@ interface Props {
 
 const CountryDetails: React.FC<Props> = ({country, url}) => {
   const [bordersCountries, setBordersCountries] = useState<string[]>([]);
-  const [error, setError] = useState(true);
+  const [error, setError] = useState(false);
 
   const handleError = (status: boolean) => {
     setError(status);
@@ -22,19 +22,30 @@ const CountryDetails: React.FC<Props> = ({country, url}) => {
       const borders: string[] = [];
 
       if (country.borders !== undefined && country.borders.length > 0) {
-          const promises = country.borders.map( async (border) => {
-          const response = await axios.get<ApiDetailsCountries>(url(border));
-          return response.data;
-        });
+        try {
+            const promises = country.borders.map(async (border) => {
+            const response = await axios.get<ApiDetailsCountries>(url(border));
 
-        const result = await Promise.all(promises);
-        result.forEach((borderName) => {
+            if (response.status !== 200) {
+              setError(true);
+              throw new Error(`The request failed with an error: ${response.status}`);
+            }
+            return response.data;
+          });
+
+          const result = await Promise.all(promises);
+          result.forEach((borderName) => {
             borders.push(borderName.name);
-        });
-        setBordersCountries(borders);
+          });
+          setBordersCountries(borders);
+        } catch (error) {
+          setError(true);
+          console.error('ErrorStatus fetching border country details: ' + error);
+        }
       }
     };
-    void  borderCountryDetails();
+
+    void borderCountryDetails();
   }, [country, url]);
 
   return (
@@ -65,7 +76,7 @@ const CountryDetails: React.FC<Props> = ({country, url}) => {
           </>
         ): (<p>Please select a country for information.</p>)}
 
-       <Error error={error} handleError={handleError}>Ошибка</Error>
+       <ErrorStatus error={error} handleError={handleError}>Error fetching border country details</ErrorStatus>
       </div>
     </>
   );
