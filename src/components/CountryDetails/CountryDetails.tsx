@@ -2,6 +2,7 @@ import {ApiDetailsCountries} from '../../types';
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import './CountryDetails.css';
+import Error from '../Error/Error';
 
 interface Props {
   country: ApiDetailsCountries;
@@ -10,7 +11,11 @@ interface Props {
 
 const CountryDetails: React.FC<Props> = ({country, url}) => {
   const [bordersCountries, setBordersCountries] = useState<string[]>([]);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(true);
+
+  const handleError = (status: boolean) => {
+    setError(status);
+  };
 
   useEffect(() => {
     const borderCountryDetails = async () => {
@@ -59,6 +64,8 @@ const CountryDetails: React.FC<Props> = ({country, url}) => {
             ): (<p>This country has no neighboring bordering countries.</p>)}
           </>
         ): (<p>Please select a country for information.</p>)}
+
+       <Error error={error} handleError={handleError}>Ошибка</Error>
       </div>
     </>
   );
